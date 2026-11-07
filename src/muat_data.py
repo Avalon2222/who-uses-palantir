@@ -32,6 +32,13 @@ KEPASTIAN = ["Resmi", "Laporan media"]
 MATA_UANG = ["USD", "GBP", "EUR", "AUD", "CAD"]
 
 
+def pecah_kontroversi(teks) -> list[str]:
+    """'k1; k2;;k1' -> ['k1', 'k2']. Spasi dibuang, sel kosong/NaN jadi list kosong, duplikat dibuang."""
+    if teks is None or (not isinstance(teks, str) and pd.isna(teks)):
+        return []
+    return list(dict.fromkeys(k.strip() for k in str(teks).split(";") if k.strip()))
+
+
 def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str})
     df["tahun_mulai"] = df["tahun_mulai"].astype(int)
@@ -84,7 +91,7 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"{tag}: nilai ada tetapi mata uang kosong/tidak dikenal")
         if pd.notna(r["tahun_akhir"]) and r["tahun_akhir"] < r["tahun_mulai"]:
             masalah.append(f"{tag}: tahun_akhir sebelum tahun_mulai")
-        for k in filter(None, str(r["kontroversi"]).split(";")):
+        for k in pecah_kontroversi(r["kontroversi"]):
             if k not in id_kon:
                 masalah.append(f"{tag}: kontroversi '{k}' tidak ada di kontroversi.csv")
     for _, r in kontroversi.iterrows():

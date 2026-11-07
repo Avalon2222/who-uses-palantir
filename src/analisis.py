@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from src.muat_data import pecah_kontroversi
+
 # Kurs perkiraan rata-rata 2024-2026, hanya untuk membandingkan skala kontrak.
 # Nilai aslinya tetap ditampilkan di tabel.
 KURS_KE_USD = {"USD": 1.0, "GBP": 1.30, "EUR": 1.10, "AUD": 0.66, "CAD": 0.73}
@@ -36,7 +38,7 @@ def lengkapi(df: pd.DataFrame) -> pd.DataFrame:
     df["nilai_usd_juta"] = [nilai_usd_juta(n, m) for n, m in zip(df["nilai_asli_juta"], df["mata_uang"])]
     df["kawasan"] = df["iso3"].map(KAWASAN).fillna("Lainnya")
     df.loc[df["sektor"] == "Organisasi internasional", "kawasan"] = "Organisasi internasional"
-    df["jumlah_kontroversi"] = df["kontroversi"].fillna("").map(lambda s: len([k for k in s.split(";") if k]))
+    df["jumlah_kontroversi"] = df["kontroversi"].map(lambda s: len(pecah_kontroversi(s)))
     df["masih_berjalan"] = df["status"].isin(["Aktif", "Rintisan", "Ditinjau ulang"])
     return df
 
@@ -124,7 +126,7 @@ def kontroversi_per_tahun(kon: pd.DataFrame) -> pd.DataFrame:
 
 
 def kontroversi_untuk(pengguna_row: pd.Series, kon: pd.DataFrame) -> pd.DataFrame:
-    ids = [k for k in str(pengguna_row.get("kontroversi", "")).split(";") if k]
+    ids = pecah_kontroversi(pengguna_row.get("kontroversi"))
     return kon[kon["id"].isin(ids)]
 
 
