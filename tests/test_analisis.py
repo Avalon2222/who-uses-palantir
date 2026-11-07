@@ -102,6 +102,16 @@ def test_kontroversi_untuk():
     assert list(analisis.kontroversi_untuk(baris, kon)["id"]) == ["k2", "k3"]
 
 
+def test_kontroversi_tahan_spasi_kosong_dan_duplikat():
+    from src.muat_data import pecah_kontroversi
+    assert pecah_kontroversi("k2; k3;;k2 ") == ["k2", "k3"]
+    assert pecah_kontroversi("") == []
+    assert pecah_kontroversi(float("nan")) == []
+    kon = pd.DataFrame({"id": ["k2", "k3", "nan"], "judul": ["x", "y", "z"]})
+    assert list(analisis.kontroversi_untuk(pd.Series({"kontroversi": "k2; k3"}), kon)["id"]) == ["k2", "k3"]
+    assert analisis.kontroversi_untuk(pd.Series({"kontroversi": float("nan")}), kon).empty
+
+
 def test_pangsa_pendapatan_menggabung_prancis():
     pend = pd.DataFrame({
         "tahun": [2020, 2020, 2020, 2020],
