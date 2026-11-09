@@ -65,3 +65,14 @@ def test_cari_pendapatan_wilayah_lewati_kolom_persen():
 
 def test_html_tanpa_tabel():
     assert sec.cari_pendapatan("<html><body><p>kosong</p></body></html>") == {"segmen": [], "wilayah": []}
+
+
+def test_baca_tabel_per_tabel_dan_baris_bersih():
+    tabel = sec.baca_tabel(HTML_TIRUAN)
+    assert len(tabel) == 3
+    assert ["Government", "2402287", "1569605", "1222215"] in tabel[0]   # pandas sudah membuang koma ribuan
+    assert all(baris for t in tabel for baris in t)   # baris yang isinya cuma simbol/kosong dibuang
+
+
+def test_baca_tabel_tanpa_tabel_kembali_kosong():
+    assert sec.baca_tabel("<html><body><p>tidak ada tabel</p></body></html>") == []
