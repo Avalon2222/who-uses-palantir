@@ -76,3 +76,31 @@ def test_baca_tabel_per_tabel_dan_baris_bersih():
 
 def test_baca_tabel_tanpa_tabel_kembali_kosong():
     assert sec.baca_tabel("<html><body><p>tidak ada tabel</p></body></html>") == []
+
+
+def test_label_bersih_buang_nomor_catatan_kaki():
+    assert sec._label_bersih("Rest of world (1)") == "Rest of world"
+    assert sec._label_bersih("United States  (12) ") == "United States"
+    assert sec._label_bersih("Government (revenue)") == "Government (revenue)"  # bukan angka, tetap
+
+
+def test_tahun_header_cari_di_baris_awal():
+    tabel = [["Years Ended December 31,"], ["2025", "2024", "2023"], ["Government", "1", "2", "3"]]
+    assert sec._tahun_header(tabel) == [2025, 2024, 2023]
+    # Satu tahun saja belum cukup untuk dianggap header.
+    assert sec._tahun_header([["2025"], ["Government", "10"]]) == []
+    # Header yang terlalu jauh di bawah (baris ke-5 dst) diabaikan.
+    assert sec._tahun_header([["a"], ["b"], ["c"], ["d"], ["2025", "2024"]]) == []
+
+
+def test_ambil_lewati_persen_dan_label_asing():
+    tabel = [
+        ["2025", "2024"],
+        ["United States", "3320043", "74", "1900247", "66"],
+        ["Japan", "1000", "1", "900", "1"],
+    ]
+    hasil = sec._ambil(tabel, sec.WILAYAH, [2025, 2024])
+    assert hasil == [
+        {"tahun": 2025, "kategori": "Amerika Serikat", "nilai_ribu_usd": 3320043.0},
+        {"tahun": 2024, "kategori": "Amerika Serikat", "nilai_ribu_usd": 1900247.0},
+    ]
