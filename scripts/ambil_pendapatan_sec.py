@@ -33,6 +33,22 @@ LAPORAN = [
 HEADER = {"User-Agent": "who-uses-palantir research-script admin@example.org"}
 
 
+def rapikan(baris: list[dict]) -> pd.DataFrame:
+    """Gabungkan hasil beberapa 10-K menjadi satu tabel tanpa tahun ganda, dalam juta USD.
+
+    Tahun yang muncul di dua 10-K: ambil SEMUA kategorinya dari laporan terbaru.
+    Jangan dedupe per kategori: 10-K lama memisahkan Prancis, 10-K baru sudah
+    memasukkannya ke "Rest of world", sehingga campuran keduanya menghitung ganda.
+    """
+    df = pd.DataFrame(baris)
+    terbaru = df.groupby(["jenis", "tahun"])["fy"].transform("max")
+    df = df[df["fy"] == terbaru].copy()
+    df["nilai_juta_usd"] = (df["nilai_ribu_usd"] / 1000).round(1)
+    return df.sort_values(["jenis", "tahun", "kategori"])[
+        ["tahun", "jenis", "kategori", "nilai_juta_usd", "sumber_10k", "sumber_url"]
+    ].reset_index(drop=True)
+
+
 def main() -> None:
     baris = []
     for fy, akses, dok in LAPORAN:
@@ -46,16 +62,7 @@ def main() -> None:
                 baris.append({**h, "jenis": jenis, "fy": fy, "sumber_10k": f"10-K FY{fy}", "sumber_url": url})
         time.sleep(1)  # batas wajar SEC: maks 10 permintaan per detik
 
-    df = pd.DataFrame(baris)
-    # Tahun yang muncul di dua 10-K: ambil SEMUA kategorinya dari laporan terbaru.
-    # Jangan dedupe per kategori: 10-K lama memisahkan Prancis, 10-K baru sudah
-    # memasukkannya ke "Rest of world", sehingga campuran keduanya menghitung ganda.
-    terbaru = df.groupby(["jenis", "tahun"])["fy"].transform("max")
-    df = df[df["fy"] == terbaru]
-    df["nilai_juta_usd"] = (df["nilai_ribu_usd"] / 1000).round(1)
-    df = df.sort_values(["jenis", "tahun", "kategori"])[
-        ["tahun", "jenis", "kategori", "nilai_juta_usd", "sumber_10k", "sumber_url"]
-    ]
+    df = rapikan(baris)
     keluar = AKAR / "data" / "pendapatan_palantir.csv"
     df.to_csv(keluar, index=False)
     print(f"tersimpan {len(df)} baris -> {keluar}")
