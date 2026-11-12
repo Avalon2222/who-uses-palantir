@@ -82,3 +82,43 @@ def test_pendapatan_tujuh_tahun_tanpa_lubang(pendapatan):
         tahun = sorted(pendapatan.loc[pendapatan["jenis"] == jenis, "tahun"].unique())
         assert tahun == list(range(2019, 2026))
     assert pd.api.types.is_numeric_dtype(pendapatan["nilai_juta_usd"])
+
+
+def test_validasi_skema_dan_duplikat(pengguna, kontroversi):
+    p = pd.concat([pengguna, pengguna.iloc[[0]]], ignore_index=True)
+    k = pd.concat([kontroversi, kontroversi.iloc[[0]]], ignore_index=True)
+    masalah = muat_data.validasi(p.assign(kolom_baru=1), k.assign(kolom_baru=1))
+    assert "kolom pengguna_palantir.csv tidak sesuai skema" in masalah
+    assert "kolom kontroversi.csv tidak sesuai skema" in masalah
+    assert f"id pengguna duplikat: {pengguna.loc[0, 'id']}" in masalah
+    assert f"id kontroversi duplikat: {kontroversi.loc[0, 'id']}" in masalah
+
+
+def test_validasi_setiap_kolom_baris(pengguna, kontroversi):
+    rusak = pengguna.copy()
+    rusak.loc[0, "status"] = "Entah"
+    rusak.loc[1, "kepastian"] = "Gosip"
+    rusak.loc[2, "iso3"] = "id"
+    rusak.loc[3, "mata_uang"] = "XYZ"
+    rusak.loc[3, "nilai_asli_juta"] = 5.0
+    rusak.loc[4, "tahun_mulai"] = 2025
+    rusak.loc[4, "tahun_akhir"] = 2020
+    rusak.loc[5, "lon"] = float("nan")
+    tag = rusak["id"]
+    masalah = muat_data.validasi(rusak, kontroversi)
+    assert f"{tag[0]}: status tidak dikenal 'Entah'" in masalah
+    assert f"{tag[1]}: kepastian tidak dikenal 'Gosip'" in masalah
+    assert f"{tag[2]}: iso3 tidak valid" in masalah
+    assert f"{tag[3]}: nilai ada tetapi mata uang kosong/tidak dikenal" in masalah
+    assert f"{tag[4]}: tahun_akhir sebelum tahun_mulai" in masalah
+    assert f"{tag[5]}: koordinat kosong" in masalah
+    assert f"{tag[5]}: koordinat di luar jangkauan" not in masalah
+
+
+def test_validasi_kontroversi(pengguna, kontroversi):
+    rusak = kontroversi.copy()
+    rusak.loc[0, "sumber_url"] = "ftp://lama.example"
+    rusak.loc[1, "dampak"] = 7
+    masalah = muat_data.validasi(pengguna, rusak)
+    assert f"{rusak.loc[0, 'id']}: sumber kontroversi harus URL https" in masalah
+    assert f"{rusak.loc[1, 'id']}: dampak harus 1, 2, atau 3" in masalah
