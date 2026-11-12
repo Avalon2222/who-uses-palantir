@@ -70,7 +70,7 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
     if pengguna["id"].duplicated().any():
         masalah.append("id pengguna duplikat: " + ", ".join(pengguna.loc[pengguna["id"].duplicated(), "id"]))
     if kontroversi["id"].duplicated().any():
-        masalah.append("id kontroversi duplikat")
+        masalah.append("id kontroversi duplikat: " + ", ".join(kontroversi.loc[kontroversi["id"].duplicated(), "id"]))
 
     id_kon = set(kontroversi["id"])
     for _, r in pengguna.iterrows():
@@ -85,7 +85,9 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"{tag}: sumber harus URL https")
         if len(str(r["iso3"])) != 3 or not str(r["iso3"]).isupper():
             masalah.append(f"{tag}: iso3 tidak valid")
-        if not (-90 <= r["lat"] <= 90 and -180 <= r["lon"] <= 180):
+        if pd.isna(r["lat"]) or pd.isna(r["lon"]):
+            masalah.append(f"{tag}: koordinat kosong")
+        elif not (-90 <= r["lat"] <= 90 and -180 <= r["lon"] <= 180):
             masalah.append(f"{tag}: koordinat di luar jangkauan")
         if pd.notna(r["nilai_asli_juta"]) and r["mata_uang"] not in MATA_UANG:
             masalah.append(f"{tag}: nilai ada tetapi mata uang kosong/tidak dikenal")
