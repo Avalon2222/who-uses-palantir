@@ -160,3 +160,20 @@ def test_rekap_jumlahkan_nilai_dan_hitung_mundur():
 
 def df_eur(nilai):
     return analisis.nilai_usd_juta(nilai, "EUR")
+
+
+def test_peta_per_tahun_hitung_lembaga_aktif_per_negara():
+    p = analisis.peta_per_tahun(contoh(), 2019, 2021)
+    usa_2020 = p[(p["tahun"] == 2020) & (p["iso3"] == "USA")]["jumlah"].iloc[0]
+    assert usa_2020 == 2
+    # NHS (GBR) mulai 2020, jadi belum ada di 2019.
+    assert p[(p["tahun"] == 2019) & (p["iso3"] == "GBR")].empty
+    assert analisis.peta_per_tahun(contoh(), 1990, 1991).empty
+
+
+def test_timeline_kumulatif_baru_dan_aktif():
+    t = analisis.timeline_kumulatif(contoh()).set_index("tahun")
+    assert t.index.min() == 2010 and t.index.max() == 2025
+    assert t["baru"].sum() == len(contoh())
+    assert t.loc[2024, "aktif"] == 3            # NHS berakhir 2023
+    assert analisis.timeline_kumulatif(contoh().iloc[0:0]).empty
