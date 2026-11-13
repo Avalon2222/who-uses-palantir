@@ -104,3 +104,20 @@ def test_ambil_lewati_persen_dan_label_asing():
         {"tahun": 2025, "kategori": "Amerika Serikat", "nilai_ribu_usd": 3320043.0},
         {"tahun": 2024, "kategori": "Amerika Serikat", "nilai_ribu_usd": 1900247.0},
     ]
+
+
+def test_ambil_nilai_negatif_dan_label_bercatatan_kaki():
+    tabel = [
+        ["", "2025", "2024"],
+        ["United States (1)", "2,402,287", "62", "1,569,605", "55"],
+        ["United Kingdom", "300,000", "8", "(1,000)", "1"],
+        ["Total revenue", "3,900,000", "100", "2,860,000", "100"],
+    ]
+    peta = {"United States": "Amerika Serikat", "United Kingdom": "Inggris"}
+    hasil = sec._ambil(tabel, peta, [2025, 2024])
+    assert hasil == [
+        {"tahun": 2025, "kategori": "Amerika Serikat", "nilai_ribu_usd": 2402287.0},
+        {"tahun": 2024, "kategori": "Amerika Serikat", "nilai_ribu_usd": 1569605.0},
+        {"tahun": 2025, "kategori": "Inggris", "nilai_ribu_usd": 300000.0},
+        {"tahun": 2024, "kategori": "Inggris", "nilai_ribu_usd": -1000.0},
+    ]
