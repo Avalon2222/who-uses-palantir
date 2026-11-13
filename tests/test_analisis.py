@@ -177,3 +177,24 @@ def test_timeline_kumulatif_baru_dan_aktif():
     assert t["baru"].sum() == len(contoh())
     assert t.loc[2024, "aktif"] == 3            # NHS berakhir 2023
     assert analisis.timeline_kumulatif(contoh().iloc[0:0]).empty
+
+
+def _kon():
+    return pd.DataFrame({
+        "id": ["k1", "k2", "k3", "k4"],
+        "tahun": [2020, 2020, 2021, 2021],
+        "jenis": ["Privasi", "Privasi", "Imigrasi", "Privasi"],
+        "dampak": [3, 1, 5, 2],
+    })
+
+
+def test_ringkas_kontroversi_urut_jumlah_lalu_dampak():
+    r = analisis.ringkas_kontroversi(_kon(), "jenis")
+    assert r["jenis"].tolist() == ["Privasi", "Imigrasi"]
+    assert r.loc[0, "jumlah"] == 3 and r.loc[0, "dampak_rata"] == 2.0
+
+
+def test_kontroversi_per_tahun_tabel_panjang():
+    t = analisis.kontroversi_per_tahun(_kon())
+    assert t["jumlah"].sum() == 4
+    assert t[(t["tahun"] == 2020) & (t["jenis"] == "Privasi")]["jumlah"].iloc[0] == 2
