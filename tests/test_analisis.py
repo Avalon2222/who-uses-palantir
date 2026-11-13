@@ -141,3 +141,22 @@ def test_rekap():
     assert r["organisasi_internasional"] == 1
     assert r["mundur"] == 1
     assert r["nilai_publik_usd_juta"] == pytest.approx(100 + 13 + 22)
+
+
+def test_rekap_tanpa_nilai_publik_jadi_nol_bukan_nan():
+    df = contoh()
+    tanpa_nilai = df[df["nilai_usd_juta"].isna()]
+    r = analisis.rekap(tanpa_nilai, pd.DataFrame({"id": []}))
+    assert r["nilai_publik_usd_juta"] == 0.0
+    assert r["lembaga"] == 2 and r["organisasi_internasional"] == 1
+
+
+def test_rekap_jumlahkan_nilai_dan_hitung_mundur():
+    r = analisis.rekap(contoh(), pd.DataFrame({"id": ["k1", "k2"]}))
+    assert r["nilai_publik_usd_juta"] == pytest.approx(100 + 13.0 + df_eur(20))
+    assert r["mundur"] == 1 and r["kontroversi"] == 2
+    assert r["negara"] == 3          # NATO tidak dihitung sebagai negara
+
+
+def df_eur(nilai):
+    return analisis.nilai_usd_juta(nilai, "EUR")
