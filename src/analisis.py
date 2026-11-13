@@ -162,7 +162,8 @@ def rekap(df: pd.DataFrame, kon: pd.DataFrame) -> dict:
         "negara": int(negara),
         "organisasi_internasional": int((df["sektor"] == "Organisasi internasional").sum()),
         "kontroversi": len(kon),
-        "nilai_publik_usd_juta": float(df["nilai_usd_juta"].sum(min_count=1) or 0),
+        # sum() biasa sudah 0 kalau semua nilai kosong; `NaN or 0` tetap NaN karena NaN itu truthy.
+        "nilai_publik_usd_juta": float(df["nilai_usd_juta"].sum()),
         "mundur": int(df["status"].isin(STATUS_MUNDUR).sum()),
         "pemerintah": int((df["sektor"] != "Korporasi").sum()),
     }
