@@ -60,6 +60,11 @@ def muat_pendapatan(path: Path | None = None) -> pd.DataFrame:
     return pd.read_csv(path or FOLDER_DATA / "pendapatan_palantir.csv")
 
 
+def _id_dobel(ids: pd.Series) -> list[str]:
+    """Id yang muncul lebih dari sekali, masing-masing disebut satu kali (id angka juga aman)."""
+    return [str(i) for i in ids[ids.duplicated()].unique()]
+
+
 def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
     """Kembalikan daftar masalah. List kosong berarti data siap dipakai."""
     masalah: list[str] = []
@@ -67,10 +72,10 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
         masalah.append("kolom pengguna_palantir.csv tidak sesuai skema")
     if list(kontroversi.columns) != KOLOM_KONTROVERSI:
         masalah.append("kolom kontroversi.csv tidak sesuai skema")
-    if pengguna["id"].duplicated().any():
-        masalah.append("id pengguna duplikat: " + ", ".join(pengguna.loc[pengguna["id"].duplicated(), "id"]))
-    if kontroversi["id"].duplicated().any():
-        masalah.append("id kontroversi duplikat: " + ", ".join(kontroversi.loc[kontroversi["id"].duplicated(), "id"]))
+    for nama, tabel in (("pengguna", pengguna), ("kontroversi", kontroversi)):
+        dobel = _id_dobel(tabel["id"])
+        if dobel:
+            masalah.append(f"id {nama} duplikat: " + ", ".join(dobel))
 
     id_kon = set(kontroversi["id"])
     for _, r in pengguna.iterrows():
