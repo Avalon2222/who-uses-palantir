@@ -198,3 +198,16 @@ def test_kontroversi_per_tahun_tabel_panjang():
     t = analisis.kontroversi_per_tahun(_kon())
     assert t["jumlah"].sum() == 4
     assert t[(t["tahun"] == 2020) & (t["jenis"] == "Privasi")]["jumlah"].iloc[0] == 2
+
+
+def test_pangsa_pendapatan_tahun_total_nol():
+    pend = pd.DataFrame({
+        "tahun": [2020, 2020, 2021, 2021],
+        "jenis": ["segmen"] * 4,
+        "kategori": ["Pemerintah", "Komersial"] * 2,
+        "nilai_juta_usd": [0.0, 0.0, 60.0, 40.0],
+    })
+    p = analisis.pangsa_pendapatan(pend, "segmen").set_index("tahun")
+    assert p.loc[2020, "Total"] == 0
+    assert pd.isna(p.loc[2020, "Pemerintah (%)"])
+    assert p.loc[2021, "Pemerintah (%)"] == pytest.approx(60.0)

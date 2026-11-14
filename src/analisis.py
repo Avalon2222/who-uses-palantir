@@ -141,8 +141,9 @@ def pangsa_pendapatan(pend: pd.DataFrame, jenis: str) -> pd.DataFrame:
         d["kategori"] = d["kategori"].replace({"Prancis": "Negara lain"})
     p = d.pivot_table(index="tahun", columns="kategori", values="nilai_juta_usd", aggfunc="sum").fillna(0)
     total = p.sum(axis=1)
+    pembagi = total.where(total != 0)  # tahun dengan total 0 -> persen NaN, bukan inf/NaN acak
     for kol in list(p.columns):
-        p[f"{kol} (%)"] = (p[kol] / total * 100).round(1)
+        p[f"{kol} (%)"] = (p[kol] / pembagi * 100).round(1)
     p["Total"] = total.round(1)
     return p.reset_index()
 
