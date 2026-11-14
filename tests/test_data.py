@@ -128,3 +128,13 @@ def test_id_dobel_disebut_sekali_dan_id_angka_aman():
     assert muat_data._id_dobel(pd.Series(["a", "b", "a", "a"])) == ["a"]
     assert muat_data._id_dobel(pd.Series([1, 2, 2])) == ["2"]
     assert muat_data._id_dobel(pd.Series(["x", "y"])) == []
+
+
+def test_muat_pengguna_tahun_mulai_kosong_sebut_id(tmp_path):
+    asli = muat_data.FOLDER_DATA / "pengguna_palantir.csv"
+    df = pd.read_csv(asli)
+    df.loc[0, "tahun_mulai"] = None
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    with pytest.raises(ValueError, match=str(df.loc[0, "id"])):
+        muat_data.muat_pengguna(csv)
