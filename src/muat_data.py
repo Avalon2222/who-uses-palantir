@@ -41,7 +41,11 @@ def pecah_kontroversi(teks) -> list[str]:
 
 def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str})
-    df["tahun_mulai"] = df["tahun_mulai"].astype(int)
+    mulai = pd.to_numeric(df["tahun_mulai"], errors="coerce")
+    if mulai.isna().any():
+        # astype(int) pada sel kosong hanya memberi error pandas yang sulit dibaca.
+        raise ValueError("tahun_mulai kosong atau bukan angka untuk id: " + ", ".join(df.loc[mulai.isna(), "id"].astype(str)))
+    df["tahun_mulai"] = mulai.astype(int)
     df["tahun_akhir"] = pd.to_numeric(df["tahun_akhir"], errors="coerce").astype("Int64")
     df["nilai_asli_juta"] = pd.to_numeric(df["nilai_asli_juta"], errors="coerce")
     for kol in ["mata_uang", "catatan_nilai", "kontroversi"]:
