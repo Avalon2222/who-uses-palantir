@@ -122,3 +122,9 @@ def test_validasi_kontroversi(pengguna, kontroversi):
     masalah = muat_data.validasi(pengguna, rusak)
     assert f"{rusak.loc[0, 'id']}: sumber kontroversi harus URL https" in masalah
     assert f"{rusak.loc[1, 'id']}: dampak harus 1, 2, atau 3" in masalah
+
+
+def test_id_dobel_disebut_sekali_dan_id_angka_aman():
+    assert muat_data._id_dobel(pd.Series(["a", "b", "a", "a"])) == ["a"]
+    assert muat_data._id_dobel(pd.Series([1, 2, 2])) == ["2"]
+    assert muat_data._id_dobel(pd.Series(["x", "y"])) == []
