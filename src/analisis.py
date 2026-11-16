@@ -64,8 +64,12 @@ def ringkas_per_negara(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["iso3", "negara", "jumlah", "sektor", "nilai_usd_juta",
                                      "kontroversi", "mundur"])
     g = df.groupby("iso3")
+    # Organisasi internasional menumpang iso3 negara markasnya (NATO -> BEL, Uni Eropa -> NLD).
+    # Nama negara diambil dari baris lembaga biasa dulu, supaya Belanda tidak tampil sebagai
+    # "Organisasi internasional (Uni Eropa)" hanya karena barisnya kebetulan lebih dulu.
+    biasa = df[df["sektor"] != "Organisasi internasional"].groupby("iso3")["negara"].first()
     hasil = pd.DataFrame({
-        "negara": g["negara"].first(),
+        "negara": biasa.reindex(g.size().index).fillna(g["negara"].first()),
         "jumlah": g.size(),
         "sektor": g["sektor"].agg(lambda s: ", ".join(sorted(set(s)))),
         "nilai_usd_juta": g["nilai_usd_juta"].sum(min_count=1),
