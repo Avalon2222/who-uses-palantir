@@ -25,8 +25,9 @@ STATUS_MUNDUR = {"Ditinjau ulang", "Ditolak/diblokir"}
 
 def nilai_usd_juta(nilai: float | None, mata_uang: str) -> float | None:
     """Konversi nilai kontrak (juta) ke juta USD dengan kurs perkiraan."""
-    if nilai is None or pd.isna(nilai) or not mata_uang:
+    if nilai is None or pd.isna(nilai) or not isinstance(mata_uang, str) or not mata_uang.strip():
         return None
+    mata_uang = mata_uang.strip().upper()
     if mata_uang not in KURS_KE_USD:
         raise ValueError(f"mata uang tidak dikenal: {mata_uang}")
     return round(float(nilai) * KURS_KE_USD[mata_uang], 1)
