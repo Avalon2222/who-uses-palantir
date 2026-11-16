@@ -46,7 +46,9 @@ def bersihkan_baris(baris: list) -> list[str]:
 
 def ke_angka(teks: str) -> float | None:
     """'1,569,605' -> 1569605.0 ; '(826,217)' -> -826217.0 ; 'Amount' -> None."""
-    t = teks.replace(",", "").strip()
+    if not isinstance(teks, str):
+        return None
+    t = teks.replace(",", "").replace("\xa0", "").strip()
     negatif = t.startswith("(")
     t = t.strip("()")
     if not re.fullmatch(r"-?\d+(\.\d+)?", t):
