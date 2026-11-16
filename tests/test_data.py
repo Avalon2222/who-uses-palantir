@@ -138,3 +138,13 @@ def test_muat_pengguna_tahun_mulai_kosong_sebut_id(tmp_path):
     df.to_csv(csv, index=False)
     with pytest.raises(ValueError, match=str(df.loc[0, "id"])):
         muat_data.muat_pengguna(csv)
+
+
+def test_validasi_mata_uang_dinormalisasi_seperti_konversi(pengguna, kontroversi):
+    p = pengguna.copy()
+    i = p.index[p["nilai_asli_juta"].notna()][0]
+    p.loc[i, "mata_uang"] = " usd "
+    assert analisis.nilai_usd_juta(p.loc[i, "nilai_asli_juta"], p.loc[i, "mata_uang"]) is not None
+    assert not [m for m in muat_data.validasi(p, kontroversi) if "mata uang" in m]
+    p.loc[i, "mata_uang"] = "IDR"
+    assert any("mata uang" in m for m in muat_data.validasi(p, kontroversi))

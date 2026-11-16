@@ -98,7 +98,9 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"{tag}: koordinat kosong")
         elif not (-90 <= r["lat"] <= 90 and -180 <= r["lon"] <= 180):
             masalah.append(f"{tag}: koordinat di luar jangkauan")
-        if pd.notna(r["nilai_asli_juta"]) and r["mata_uang"] not in MATA_UANG:
+        # Normalisasi sama dengan analisis.nilai_usd_juta: " usd" tetap dianggap USD.
+        mata_uang = r["mata_uang"].strip().upper() if isinstance(r["mata_uang"], str) else ""
+        if pd.notna(r["nilai_asli_juta"]) and mata_uang not in MATA_UANG:
             masalah.append(f"{tag}: nilai ada tetapi mata uang kosong/tidak dikenal")
         if pd.notna(r["tahun_akhir"]) and r["tahun_akhir"] < r["tahun_mulai"]:
             masalah.append(f"{tag}: tahun_akhir sebelum tahun_mulai")
