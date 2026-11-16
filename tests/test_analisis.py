@@ -143,6 +143,9 @@ def test_cagr():
     assert analisis.cagr(100, 121, 2) == pytest.approx(10.0)
     with pytest.raises(ValueError):
         analisis.cagr(0, 10, 2)
+    with pytest.raises(ValueError):
+        analisis.cagr(100, -10, 2)
+    assert analisis.cagr(100, 0, 2) == pytest.approx(-100.0)
 
 
 def test_rekap():

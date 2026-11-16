@@ -157,6 +157,9 @@ def cagr(awal: float, akhir: float, tahun: int) -> float:
     """Compound annual growth rate dalam persen."""
     if awal <= 0 or tahun <= 0:
         raise ValueError("awal dan tahun harus positif")
+    if akhir < 0:
+        # Akar pecahan dari rasio negatif menghasilkan bilangan kompleks, bukan persen.
+        raise ValueError("akhir tidak boleh negatif")
     return round(((akhir / awal) ** (1 / tahun) - 1) * 100, 1)
 
 
