@@ -59,6 +59,18 @@ def test_ringkas_per_negara():
     assert r[r["iso3"] == "DEU"].iloc[0]["mundur"] == 1
 
 
+def test_ringkas_per_negara_nama_tidak_tertimpa_organisasi():
+    df = contoh()
+    belgia = df[df["id"] == "d"].assign(id="f", negara="Belgia", iso3="BEL", sektor="Kepolisian")
+    df = pd.concat([df, belgia], ignore_index=True)
+    r = analisis.ringkas_per_negara(df).set_index("iso3")
+    assert r.loc["BEL", "negara"] == "Belgia"
+    assert r.loc["BEL", "jumlah"] == 2
+    # Negara yang hanya berisi organisasi internasional tetap punya nama.
+    hanya_org = analisis.ringkas_per_negara(contoh()).set_index("iso3")
+    assert hanya_org.loc["BEL", "negara"] == "Organisasi internasional (NATO)"
+
+
 def test_ringkas_per_negara_kosong():
     kosong = analisis.ringkas_per_negara(contoh().iloc[0:0])
     assert kosong.empty and "jumlah" in kosong.columns
