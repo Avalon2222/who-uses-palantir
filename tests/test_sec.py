@@ -121,3 +121,9 @@ def test_ambil_nilai_negatif_dan_label_bercatatan_kaki():
         {"tahun": 2025, "kategori": "Inggris", "nilai_ribu_usd": 300000.0},
         {"tahun": 2024, "kategori": "Inggris", "nilai_ribu_usd": -1000.0},
     ]
+
+
+def test_ke_angka_sel_bukan_teks_dan_nbsp():
+    assert sec.ke_angka(None) is None
+    assert sec.ke_angka(float("nan")) is None
+    assert sec.ke_angka("1,569,605\xa0") == 1569605.0

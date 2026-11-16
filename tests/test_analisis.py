@@ -211,3 +211,10 @@ def test_pangsa_pendapatan_tahun_total_nol():
     assert p.loc[2020, "Total"] == 0
     assert pd.isna(p.loc[2020, "Pemerintah (%)"])
     assert p.loc[2021, "Pemerintah (%)"] == pytest.approx(60.0)
+
+
+def test_nilai_usd_juta_mata_uang_kosong_dan_huruf_kecil():
+    assert analisis.nilai_usd_juta(10, " usd ") == 10.0
+    assert analisis.nilai_usd_juta(10, "gbp") == 13.0
+    assert analisis.nilai_usd_juta(10, float("nan")) is None
+    assert analisis.nilai_usd_juta(10, "  ") is None
