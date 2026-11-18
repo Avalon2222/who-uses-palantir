@@ -49,7 +49,9 @@ def ke_angka(teks: str) -> float | None:
     if not isinstance(teks, str):
         return None
     # Sebagian 10-K menaruh simbol dolar di sel yang sama: "$1,569,605" atau "$ (826,217)".
-    t = teks.replace(",", "").replace("\xa0", "").strip().lstrip("$").strip()
+    # Minus tipografi (U+2212) dan en dash juga dipakai sebagian dokumen sebagai tanda negatif.
+    t = teks.replace(",", "").replace("\xa0", "").replace("\u2212", "-").replace("\u2013", "-")
+    t = t.strip().lstrip("$").strip()
     negatif = t.startswith("(")
     t = t.strip("()")
     if not re.fullmatch(r"-?\d+(\.\d+)?", t):
