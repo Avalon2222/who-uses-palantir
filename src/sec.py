@@ -48,7 +48,8 @@ def ke_angka(teks: str) -> float | None:
     """'1,569,605' -> 1569605.0 ; '(826,217)' -> -826217.0 ; 'Amount' -> None."""
     if not isinstance(teks, str):
         return None
-    t = teks.replace(",", "").replace("\xa0", "").strip()
+    # Sebagian 10-K menaruh simbol dolar di sel yang sama: "$1,569,605" atau "$ (826,217)".
+    t = teks.replace(",", "").replace("\xa0", "").strip().lstrip("$").strip()
     negatif = t.startswith("(")
     t = t.strip("()")
     if not re.fullmatch(r"-?\d+(\.\d+)?", t):

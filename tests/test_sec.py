@@ -127,3 +127,9 @@ def test_ke_angka_sel_bukan_teks_dan_nbsp():
     assert sec.ke_angka(None) is None
     assert sec.ke_angka(float("nan")) is None
     assert sec.ke_angka("1,569,605\xa0") == 1569605.0
+
+
+def test_ke_angka_dengan_simbol_dolar_di_sel_yang_sama():
+    assert sec.ke_angka("$1,569,605") == 1569605.0
+    assert sec.ke_angka("$ 2,865,507") == 2865507.0
+    assert sec.ke_angka("$ (826,217)") == -826217.0
