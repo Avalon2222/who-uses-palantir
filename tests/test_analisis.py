@@ -246,3 +246,10 @@ def test_peta_per_tahun_satu_baris_per_negara():
     # Negara yang hanya berisi organisasi internasional tetap tampil dengan namanya.
     assert analisis.peta_per_tahun(contoh(), 2025, 2025).set_index("iso3").loc["BEL", "negara"] == \
         "Organisasi internasional (NATO)"
+
+
+def test_timeline_negara_aktif_tidak_menghitung_organisasi_internasional():
+    t = analisis.timeline_kumulatif(contoh()).set_index("tahun")
+    # 2025: USA dan DEU aktif; NATO (BEL) tidak dihitung sebagai negara, GBR sudah berakhir.
+    assert t.loc[2025, "negara_aktif"] == 2
+    assert t.loc[2025, "aktif"] == 4
