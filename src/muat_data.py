@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -33,10 +34,14 @@ MATA_UANG = ["USD", "GBP", "EUR", "AUD", "CAD"]
 
 
 def pecah_kontroversi(teks) -> list[str]:
-    """'k1; k2;;k1' -> ['k1', 'k2']. Spasi dibuang, sel kosong/NaN jadi list kosong, duplikat dibuang."""
+    """'k1; k2;;k1' -> ['k1', 'k2']. Spasi dibuang, sel kosong/NaN jadi list kosong, duplikat dibuang.
+
+    Koma juga diterima sebagai pemisah ('k1,k2'), karena id kontroversi sendiri tidak memuat koma;
+    tanpa itu 'k1,k2' dibaca sebagai satu id yang tidak ada dan kedua kontroversinya hilang diam-diam.
+    """
     if teks is None or (not isinstance(teks, str) and pd.isna(teks)):
         return []
-    return list(dict.fromkeys(k.strip() for k in str(teks).split(";") if k.strip()))
+    return list(dict.fromkeys(k.strip() for k in re.split(r"[;,]", str(teks)) if k.strip()))
 
 
 def muat_pengguna(path: Path | None = None) -> pd.DataFrame:

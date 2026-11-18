@@ -253,3 +253,8 @@ def test_timeline_negara_aktif_tidak_menghitung_organisasi_internasional():
     # 2025: USA dan DEU aktif; NATO (BEL) tidak dihitung sebagai negara, GBR sudah berakhir.
     assert t.loc[2025, "negara_aktif"] == 2
     assert t.loc[2025, "aktif"] == 4
+
+
+def test_pecah_kontroversi_menerima_koma():
+    from src.muat_data import pecah_kontroversi
+    assert pecah_kontroversi("dcgs-a, ai-targeting;dcgs-a") == ["dcgs-a", "ai-targeting"]
