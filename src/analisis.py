@@ -116,7 +116,9 @@ def timeline_kumulatif(df: pd.DataFrame, sampai: int | None = None) -> pd.DataFr
             "tahun": th,
             "baru": int((df["tahun_mulai"] == th).sum()),
             "aktif": len(a),
-            "negara_aktif": a["iso3"].nunique(),
+            # Sama seperti rekap(): organisasi internasional tidak menambah jumlah negara
+            # (NATO menumpang iso3 Belgia meski tidak ada lembaga Belgia yang memakai Palantir).
+            "negara_aktif": a.loc[a["sektor"] != "Organisasi internasional", "iso3"].nunique(),
         })
     return pd.DataFrame(baris)
 
