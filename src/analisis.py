@@ -88,9 +88,14 @@ def aktif_pada(df: pd.DataFrame, tahun: int) -> pd.DataFrame:
 def peta_per_tahun(df: pd.DataFrame, dari: int, sampai: int) -> pd.DataFrame:
     """Jumlah lembaga aktif per negara untuk setiap tahun (bahan peta animasi)."""
     baris = []
+    # Satu baris per negara per tahun. Organisasi internasional menumpang iso3 negara markasnya
+    # (Uni Eropa -> NLD), jadi grup per (iso3, negara) membuat NLD muncul dua kali di peta.
+    biasa = df[df["sektor"] != "Organisasi internasional"].groupby("iso3")["negara"].first()
     for th in range(dari, sampai + 1):
         a = aktif_pada(df, th)
-        for (iso3, negara), n in a.groupby(["iso3", "negara"]).size().items():
+        nama = a.groupby("iso3")["negara"].first()
+        for iso3, n in a.groupby("iso3").size().items():
+            negara = biasa.get(iso3, nama[iso3])
             baris.append({"tahun": th, "iso3": iso3, "negara": negara, "jumlah": int(n)})
     return pd.DataFrame(baris, columns=["tahun", "iso3", "negara", "jumlah"])
 

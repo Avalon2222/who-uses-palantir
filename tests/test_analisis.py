@@ -233,3 +233,16 @@ def test_nilai_usd_juta_mata_uang_kosong_dan_huruf_kecil():
     assert analisis.nilai_usd_juta(10, "gbp") == 13.0
     assert analisis.nilai_usd_juta(10, float("nan")) is None
     assert analisis.nilai_usd_juta(10, "  ") is None
+
+
+def test_peta_per_tahun_satu_baris_per_negara():
+    df = contoh()
+    belgia = df[df["id"] == "d"].assign(id="f", negara="Belgia", iso3="BEL", sektor="Kepolisian")
+    df = pd.concat([df, belgia], ignore_index=True)
+    peta = analisis.peta_per_tahun(df, 2025, 2025)
+    assert not peta["iso3"].duplicated().any()
+    bel = peta.set_index("iso3").loc["BEL"]
+    assert bel["negara"] == "Belgia" and bel["jumlah"] == 2
+    # Negara yang hanya berisi organisasi internasional tetap tampil dengan namanya.
+    assert analisis.peta_per_tahun(contoh(), 2025, 2025).set_index("iso3").loc["BEL", "negara"] == \
+        "Organisasi internasional (NATO)"
