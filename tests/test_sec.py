@@ -133,3 +133,8 @@ def test_ke_angka_dengan_simbol_dolar_di_sel_yang_sama():
     assert sec.ke_angka("$1,569,605") == 1569605.0
     assert sec.ke_angka("$ 2,865,507") == 2865507.0
     assert sec.ke_angka("$ (826,217)") == -826217.0
+
+
+def test_ke_angka_minus_tipografi():
+    assert sec.ke_angka("−826,217") == -826217.0
+    assert sec.ke_angka("–1,000") == -1000.0
