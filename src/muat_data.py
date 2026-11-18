@@ -55,8 +55,12 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
 
 def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path or FOLDER_DATA / "kontroversi.csv")
-    df["tahun"] = df["tahun"].astype(int)
-    df["dampak"] = df["dampak"].astype(int)
+    for kol in ("tahun", "dampak"):
+        angka = pd.to_numeric(df[kol], errors="coerce")
+        if angka.isna().any():
+            # Sama seperti muat_pengguna: sebut id barisnya, jangan error astype yang sulit dibaca.
+            raise ValueError(f"{kol} kosong atau bukan angka untuk id: " + ", ".join(df.loc[angka.isna(), "id"].astype(str)))
+        df[kol] = angka.astype(int)
     return df
 
 

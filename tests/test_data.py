@@ -148,3 +148,13 @@ def test_validasi_mata_uang_dinormalisasi_seperti_konversi(pengguna, kontroversi
     assert not [m for m in muat_data.validasi(p, kontroversi) if "mata uang" in m]
     p.loc[i, "mata_uang"] = "IDR"
     assert any("mata uang" in m for m in muat_data.validasi(p, kontroversi))
+
+
+def test_muat_kontroversi_tahun_kosong_sebut_id(tmp_path):
+    df = muat_data.muat_kontroversi()
+    df["tahun"] = df["tahun"].astype(object)
+    df.loc[0, "tahun"] = None
+    csv = tmp_path / "kontroversi.csv"
+    df.to_csv(csv, index=False)
+    with pytest.raises(ValueError, match=f"tahun kosong.*{df.loc[0, 'id']}"):
+        muat_data.muat_kontroversi(csv)
