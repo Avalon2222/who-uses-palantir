@@ -258,3 +258,12 @@ def test_timeline_negara_aktif_tidak_menghitung_organisasi_internasional():
 def test_pecah_kontroversi_menerima_koma():
     from src.muat_data import pecah_kontroversi
     assert pecah_kontroversi("dcgs-a, ai-targeting;dcgs-a") == ["dcgs-a", "ai-targeting"]
+
+
+def test_kontroversi_jenis_kosong_tetap_terhitung():
+    kon = _kon()
+    kon.loc[3, "jenis"] = None
+    r = analisis.ringkas_kontroversi(kon, "jenis")
+    assert r["jumlah"].sum() == 4
+    assert "Tidak diketahui" in set(r["jenis"])
+    assert analisis.kontroversi_per_tahun(kon)["jumlah"].sum() == 4
