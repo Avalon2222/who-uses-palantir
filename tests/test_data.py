@@ -158,3 +158,10 @@ def test_muat_kontroversi_tahun_kosong_sebut_id(tmp_path):
     df.to_csv(csv, index=False)
     with pytest.raises(ValueError, match=f"tahun kosong.*{df.loc[0, 'id']}"):
         muat_data.muat_kontroversi(csv)
+
+
+@pytest.mark.parametrize("kode", ["U5A", "GB1", "US", "USAA", "us a"])
+def test_validasi_iso3_harus_tiga_huruf(pengguna, kontroversi, kode):
+    rusak = pengguna.copy()
+    rusak.loc[0, "iso3"] = kode
+    assert f"{rusak.loc[0, 'id']}: iso3 tidak valid" in muat_data.validasi(rusak, kontroversi)
