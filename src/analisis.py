@@ -124,7 +124,12 @@ def timeline_kumulatif(df: pd.DataFrame, sampai: int | None = None) -> pd.DataFr
 
 
 def ringkas_kontroversi(kon: pd.DataFrame, kolom: str) -> pd.DataFrame:
-    """Hitung kontroversi per `kolom` (jenis/hasil/negara) beserta rata-rata dampak."""
+    """Hitung kontroversi per `kolom` (jenis/hasil/negara) beserta rata-rata dampak.
+
+    Nilai `kolom` yang kosong dihitung sebagai "Tidak diketahui"; groupby biasa membuangnya
+    sehingga total jumlah lebih kecil dari banyaknya kontroversi.
+    """
+    kon = kon.assign(**{kolom: kon[kolom].astype(object).where(kon[kolom].notna(), "Tidak diketahui")})
     return (kon.groupby(kolom)
                .agg(jumlah=("id", "count"), dampak_rata=("dampak", "mean"))
                .reset_index()
@@ -133,7 +138,8 @@ def ringkas_kontroversi(kon: pd.DataFrame, kolom: str) -> pd.DataFrame:
 
 
 def kontroversi_per_tahun(kon: pd.DataFrame) -> pd.DataFrame:
-    """Tabel tahun x jenis kontroversi (bahan stacked bar)."""
+    """Tabel tahun x jenis kontroversi (bahan stacked bar). Jenis kosong -> "Tidak diketahui"."""
+    kon = kon.assign(jenis=kon["jenis"].astype(object).where(kon["jenis"].notna(), "Tidak diketahui"))
     return kon.groupby(["tahun", "jenis"]).size().reset_index(name="jumlah")
 
 
