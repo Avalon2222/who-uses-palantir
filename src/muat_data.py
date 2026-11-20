@@ -101,7 +101,8 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"{tag}: kepastian tidak dikenal '{r['kepastian']}'")
         if not str(r["sumber_url"]).startswith("https://"):
             masalah.append(f"{tag}: sumber harus URL https")
-        if len(str(r["iso3"])) != 3 or not str(r["iso3"]).isupper():
+        # Tepat tiga huruf A-Z: "U5A" atau "GB1" lolos isupper() tetapi bukan kode ISO-3.
+        if not re.fullmatch(r"[A-Z]{3}", str(r["iso3"])):
             masalah.append(f"{tag}: iso3 tidak valid")
         if pd.isna(r["lat"]) or pd.isna(r["lon"]):
             masalah.append(f"{tag}: koordinat kosong")
