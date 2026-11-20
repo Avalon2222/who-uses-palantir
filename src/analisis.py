@@ -71,7 +71,8 @@ def ringkas_per_negara(df: pd.DataFrame) -> pd.DataFrame:
     hasil = pd.DataFrame({
         "negara": biasa.reindex(g.size().index).fillna(g["negara"].first()),
         "jumlah": g.size(),
-        "sektor": g["sektor"].agg(lambda s: ", ".join(sorted(set(s)))),
+        # dropna: sektor kosong (NaN) bersama teks membuat sorted() melempar TypeError.
+        "sektor": g["sektor"].agg(lambda s: ", ".join(sorted(set(s.dropna().astype(str))))),
         "nilai_usd_juta": g["nilai_usd_juta"].sum(min_count=1),
         "kontroversi": g["jumlah_kontroversi"].sum(),
         "mundur": g["status"].agg(lambda s: int(s.isin(STATUS_MUNDUR).sum())),

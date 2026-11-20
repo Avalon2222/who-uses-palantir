@@ -267,3 +267,11 @@ def test_kontroversi_jenis_kosong_tetap_terhitung():
     assert r["jumlah"].sum() == 4
     assert "Tidak diketahui" in set(r["jenis"])
     assert analisis.kontroversi_per_tahun(kon)["jumlah"].sum() == 4
+
+
+def test_ringkas_per_negara_sektor_kosong_tidak_crash():
+    df = contoh()
+    df.loc[1, "sektor"] = None
+    r = analisis.ringkas_per_negara(df).set_index("iso3")
+    assert r.loc["USA", "sektor"] == "Militer & pertahanan"
+    assert r.loc["USA", "jumlah"] == 2
