@@ -186,3 +186,10 @@ def test_muat_pengguna_tahun_pecahan_sebut_id(tmp_path, kolom):
     df.to_csv(csv, index=False)
     with pytest.raises(ValueError, match=f"tahun harus bilangan bulat.*{df.loc[0, 'id']}"):
         muat_data.muat_pengguna(csv)
+
+
+def test_validasi_nilai_negatif(pengguna, kontroversi):
+    rusak = pengguna.copy()
+    i = rusak.index[rusak["nilai_asli_juta"].notna()][0]
+    rusak.loc[i, "nilai_asli_juta"] = -5.0
+    assert f"{rusak.loc[i, 'id']}: nilai kontrak negatif" in muat_data.validasi(rusak, kontroversi)
