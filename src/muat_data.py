@@ -50,8 +50,13 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     if mulai.isna().any():
         # astype(int) pada sel kosong hanya memberi error pandas yang sulit dibaca.
         raise ValueError("tahun_mulai kosong atau bukan angka untuk id: " + ", ".join(df.loc[mulai.isna(), "id"].astype(str)))
+    akhir = pd.to_numeric(df["tahun_akhir"], errors="coerce")
+    # Tahun pecahan (2019.5) dulu dipotong diam-diam (tahun_mulai) atau gagal dengan TypeError Int64 (tahun_akhir).
+    pecahan = (mulai != mulai.round()) | (akhir.notna() & (akhir != akhir.round()))
+    if pecahan.any():
+        raise ValueError("tahun harus bilangan bulat untuk id: " + ", ".join(df.loc[pecahan, "id"].astype(str)))
     df["tahun_mulai"] = mulai.astype(int)
-    df["tahun_akhir"] = pd.to_numeric(df["tahun_akhir"], errors="coerce").astype("Int64")
+    df["tahun_akhir"] = akhir.astype("Int64")
     df["nilai_asli_juta"] = pd.to_numeric(df["nilai_asli_juta"], errors="coerce")
     for kol in ["mata_uang", "catatan_nilai", "kontroversi"]:
         df[kol] = df[kol].fillna("")

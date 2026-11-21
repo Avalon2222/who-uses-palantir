@@ -175,3 +175,14 @@ def test_muat_kontroversi_dampak_pecahan_ditolak(tmp_path):
     df.to_csv(csv, index=False)
     with pytest.raises(ValueError, match=f"dampak harus bilangan bulat.*{df.loc[0, 'id']}"):
         muat_data.muat_kontroversi(csv)
+
+
+@pytest.mark.parametrize("kolom", ["tahun_mulai", "tahun_akhir"])
+def test_muat_pengguna_tahun_pecahan_sebut_id(tmp_path, kolom):
+    df = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    df[kolom] = df[kolom].astype(float)
+    df.loc[0, kolom] = 2019.5
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    with pytest.raises(ValueError, match=f"tahun harus bilangan bulat.*{df.loc[0, 'id']}"):
+        muat_data.muat_pengguna(csv)
