@@ -121,6 +121,9 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
         mata_uang = r["mata_uang"].strip().upper() if isinstance(r["mata_uang"], str) else ""
         if pd.notna(r["nilai_asli_juta"]) and mata_uang not in MATA_UANG:
             masalah.append(f"{tag}: nilai ada tetapi mata uang kosong/tidak dikenal")
+        # Nilai kontrak negatif hampir pasti salah ketik, dan diam-diam mengurangi total di kartu KPI.
+        if pd.notna(r["nilai_asli_juta"]) and r["nilai_asli_juta"] < 0:
+            masalah.append(f"{tag}: nilai kontrak negatif")
         if pd.notna(r["tahun_akhir"]) and r["tahun_akhir"] < r["tahun_mulai"]:
             masalah.append(f"{tag}: tahun_akhir sebelum tahun_mulai")
         for k in pecah_kontroversi(r["kontroversi"]):
