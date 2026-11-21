@@ -165,3 +165,13 @@ def test_validasi_iso3_harus_tiga_huruf(pengguna, kontroversi, kode):
     rusak = pengguna.copy()
     rusak.loc[0, "iso3"] = kode
     assert f"{rusak.loc[0, 'id']}: iso3 tidak valid" in muat_data.validasi(rusak, kontroversi)
+
+
+def test_muat_kontroversi_dampak_pecahan_ditolak(tmp_path):
+    df = muat_data.muat_kontroversi()
+    df["dampak"] = df["dampak"].astype(float)
+    df.loc[0, "dampak"] = 2.5
+    csv = tmp_path / "kontroversi.csv"
+    df.to_csv(csv, index=False)
+    with pytest.raises(ValueError, match=f"dampak harus bilangan bulat.*{df.loc[0, 'id']}"):
+        muat_data.muat_kontroversi(csv)

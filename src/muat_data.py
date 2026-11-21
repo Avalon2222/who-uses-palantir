@@ -65,6 +65,10 @@ def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
         if angka.isna().any():
             # Sama seperti muat_pengguna: sebut id barisnya, jangan error astype yang sulit dibaca.
             raise ValueError(f"{kol} kosong atau bukan angka untuk id: " + ", ".join(df.loc[angka.isna(), "id"].astype(str)))
+        # astype(int) memotong pecahan diam-diam: dampak 2.5 jadi 2 dan lolos validasi.
+        pecahan = angka != angka.round()
+        if pecahan.any():
+            raise ValueError(f"{kol} harus bilangan bulat untuk id: " + ", ".join(df.loc[pecahan, "id"].astype(str)))
         df[kol] = angka.astype(int)
     return df
 
