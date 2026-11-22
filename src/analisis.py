@@ -171,6 +171,9 @@ def pangsa_pendapatan(pend: pd.DataFrame, jenis: str) -> pd.DataFrame:
 
 def cagr(awal: float, akhir: float, tahun: int) -> float:
     """Compound annual growth rate dalam persen."""
+    # NaN lolos dari perbandingan <= 0 dan diam-diam menghasilkan NaN; tolak dengan jelas.
+    if pd.isna(awal) or pd.isna(akhir):
+        raise ValueError("awal dan akhir tidak boleh kosong")
     if awal <= 0 or tahun <= 0:
         raise ValueError("awal dan tahun harus positif")
     if akhir < 0:

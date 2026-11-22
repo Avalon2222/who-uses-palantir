@@ -285,3 +285,10 @@ def test_timeline_sampai_sebelum_tahun_pertama_tetap_punya_kolom():
 def test_saring_rentang_tahun_terbalik():
     df = contoh()
     assert len(analisis.saring(df, tahun=(2030, 2012))) == len(analisis.saring(df, tahun=(2012, 2030)))
+
+
+def test_cagr_tolak_nilai_kosong():
+    with pytest.raises(ValueError, match="kosong"):
+        analisis.cagr(float("nan"), 10, 2)
+    with pytest.raises(ValueError, match="kosong"):
+        analisis.cagr(100, float("nan"), 2)
