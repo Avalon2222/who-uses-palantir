@@ -275,3 +275,8 @@ def test_ringkas_per_negara_sektor_kosong_tidak_crash():
     r = analisis.ringkas_per_negara(df).set_index("iso3")
     assert r.loc["USA", "sektor"] == "Militer & pertahanan"
     assert r.loc["USA", "jumlah"] == 2
+
+
+def test_timeline_sampai_sebelum_tahun_pertama_tetap_punya_kolom():
+    t = analisis.timeline_kumulatif(contoh(), sampai=2000)
+    assert t.empty and list(t.columns) == ["tahun", "baru", "aktif", "negara_aktif"]

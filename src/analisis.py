@@ -121,7 +121,8 @@ def timeline_kumulatif(df: pd.DataFrame, sampai: int | None = None) -> pd.DataFr
             # (NATO menumpang iso3 Belgia meski tidak ada lembaga Belgia yang memakai Palantir).
             "negara_aktif": a.loc[a["sektor"] != "Organisasi internasional", "iso3"].nunique(),
         })
-    return pd.DataFrame(baris)
+    # Kolom tetap ada walau `sampai` lebih awal dari tahun pertama (tanpa baris sama sekali).
+    return pd.DataFrame(baris, columns=["tahun", "baru", "aktif", "negara_aktif"])
 
 
 def ringkas_kontroversi(kon: pd.DataFrame, kolom: str) -> pd.DataFrame:
