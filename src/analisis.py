@@ -54,7 +54,8 @@ def saring(df: pd.DataFrame, sektor=None, status=None, kepastian=None, tahun=Non
     if kepastian:
         m &= df["kepastian"].isin(kepastian)
     if tahun:
-        m &= df["tahun_mulai"].between(tahun[0], tahun[1])
+        # Rentang terbalik (2025, 2020) tetap dibaca 2020-2025, bukan hasil kosong.
+        m &= df["tahun_mulai"].between(min(tahun), max(tahun))
     return df[m]
 
 
