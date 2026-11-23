@@ -305,3 +305,10 @@ def test_ringkas_per_negara_seri_diurutkan_menurut_nama():
     })
     r = analisis.ringkas_per_negara(analisis.lengkapi(df))
     assert r["negara"].tolist() == sorted(negara)
+
+
+def test_saring_terima_satu_teks():
+    df = contoh()
+    assert len(analisis.saring(df, sektor="Kesehatan")) == 1
+    assert len(analisis.saring(df, status="Aktif")) == 3
+    assert len(analisis.saring(df, kepastian="Laporan media")) == 2

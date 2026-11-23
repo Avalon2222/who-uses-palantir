@@ -44,15 +44,20 @@ def lengkapi(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _daftar(nilai) -> list:
+    """Satu teks ("Kesehatan") dibungkus jadi list; isin() menolak teks tunggal."""
+    return [nilai] if isinstance(nilai, str) else list(nilai)
+
+
 def saring(df: pd.DataFrame, sektor=None, status=None, kepastian=None, tahun=None) -> pd.DataFrame:
     """Filter sederhana. Argumen None berarti tidak difilter."""
     m = pd.Series(True, index=df.index)
     if sektor:
-        m &= df["sektor"].isin(sektor)
+        m &= df["sektor"].isin(_daftar(sektor))
     if status:
-        m &= df["status"].isin(status)
+        m &= df["status"].isin(_daftar(status))
     if kepastian:
-        m &= df["kepastian"].isin(kepastian)
+        m &= df["kepastian"].isin(_daftar(kepastian))
     if tahun:
         # Rentang terbalik (2025, 2020) tetap dibaca 2020-2025, bukan hasil kosong.
         m &= df["tahun_mulai"].between(min(tahun), max(tahun))
