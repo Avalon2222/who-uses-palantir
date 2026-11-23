@@ -292,3 +292,16 @@ def test_cagr_tolak_nilai_kosong():
         analisis.cagr(float("nan"), 10, 2)
     with pytest.raises(ValueError, match="kosong"):
         analisis.cagr(100, float("nan"), 2)
+
+
+def test_ringkas_per_negara_seri_diurutkan_menurut_nama():
+    n = 60
+    negara = [f"Negara {i:02d}" for i in range(n)][::-1]
+    df = pd.DataFrame({
+        "id": [f"x{i}" for i in range(n)], "negara": negara, "iso3": [f"N{i:02d}" for i in range(n)],
+        "lembaga": "Lembaga", "sektor": "Kepolisian", "tahun_mulai": 2020,
+        "tahun_akhir": pd.array([pd.NA] * n, dtype="Int64"), "status": "Aktif", "kepastian": "Resmi",
+        "nilai_asli_juta": [None] * n, "mata_uang": "", "kontroversi": "",
+    })
+    r = analisis.ringkas_per_negara(analisis.lengkapi(df))
+    assert r["negara"].tolist() == sorted(negara)
