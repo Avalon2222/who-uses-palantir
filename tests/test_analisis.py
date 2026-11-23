@@ -1,5 +1,6 @@
 """Uji fungsi analisis dengan data kecil buatan sendiri (tidak bergantung pada CSV)."""
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -312,3 +313,9 @@ def test_saring_terima_satu_teks():
     assert len(analisis.saring(df, sektor="Kesehatan")) == 1
     assert len(analisis.saring(df, status="Aktif")) == 3
     assert len(analisis.saring(df, kepastian="Laporan media")) == 2
+
+
+def test_saring_satu_tahun():
+    df = contoh()
+    assert analisis.saring(df, tahun=2017)["lembaga"].tolist() == ["Polisi Hessen"]
+    assert len(analisis.saring(df, tahun=np.int64(2020))) == 1

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import numbers
+
 import pandas as pd
 
 from src.muat_data import pecah_kontroversi
@@ -60,7 +62,9 @@ def saring(df: pd.DataFrame, sektor=None, status=None, kepastian=None, tahun=Non
         m &= df["kepastian"].isin(_daftar(kepastian))
     if tahun:
         # Rentang terbalik (2025, 2020) tetap dibaca 2020-2025, bukan hasil kosong.
-        m &= df["tahun_mulai"].between(min(tahun), max(tahun))
+        # Satu tahun saja (2020) dibaca sebagai rentang 2020-2020.
+        rentang = (tahun, tahun) if isinstance(tahun, numbers.Real) else tuple(tahun)
+        m &= df["tahun_mulai"].between(min(rentang), max(rentang))
     return df[m]
 
 
