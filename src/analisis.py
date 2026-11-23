@@ -78,7 +78,9 @@ def ringkas_per_negara(df: pd.DataFrame) -> pd.DataFrame:
         "kontroversi": g["jumlah_kontroversi"].sum(),
         "mundur": g["status"].agg(lambda s: int(s.isin(STATUS_MUNDUR).sum())),
     }).reset_index()
-    return hasil.sort_values(["jumlah", "nilai_usd_juta"], ascending=False).reset_index(drop=True)
+    # Negara yang seri (jumlah dan nilai sama, atau nilai kosong) diurutkan menurut nama.
+    return hasil.sort_values(["jumlah", "nilai_usd_juta", "negara"], ascending=[False, False, True],
+                             kind="mergesort").reset_index(drop=True)
 
 
 def aktif_pada(df: pd.DataFrame, tahun: int) -> pd.DataFrame:
