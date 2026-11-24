@@ -188,6 +188,18 @@ def test_muat_pengguna_tahun_pecahan_sebut_id(tmp_path, kolom):
         muat_data.muat_pengguna(csv)
 
 
+@pytest.mark.parametrize("kolom, pesan", [("tahun_mulai", "kosong atau bukan angka"),
+                                          ("tahun_akhir", "harus bilangan bulat")])
+def test_muat_pengguna_tahun_tak_hingga_sebut_id(tmp_path, kolom, pesan):
+    df = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    df[kolom] = df[kolom].astype(object)
+    df.loc[0, kolom] = "inf"
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    with pytest.raises(ValueError, match=f"{pesan}.*{df.loc[0, 'id']}"):
+        muat_data.muat_pengguna(csv)
+
+
 def test_validasi_nilai_negatif(pengguna, kontroversi):
     rusak = pengguna.copy()
     i = rusak.index[rusak["nilai_asli_juta"].notna()][0]
