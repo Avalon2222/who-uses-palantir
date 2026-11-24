@@ -48,12 +48,15 @@ def pecah_kontroversi(teks) -> list[str]:
 def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str})
     mulai = pd.to_numeric(df["tahun_mulai"], errors="coerce")
+    # "inf" terbaca to_numeric sebagai tak hingga, lalu astype(int) gagal tanpa menyebut id barisnya.
+    mulai = mulai.where(mulai.abs() != math.inf)
     if mulai.isna().any():
         # astype(int) pada sel kosong hanya memberi error pandas yang sulit dibaca.
         raise ValueError("tahun_mulai kosong atau bukan angka untuk id: " + ", ".join(df.loc[mulai.isna(), "id"].astype(str)))
     akhir = pd.to_numeric(df["tahun_akhir"], errors="coerce")
     # Tahun pecahan (2019.5) dulu dipotong diam-diam (tahun_mulai) atau gagal dengan TypeError Int64 (tahun_akhir).
-    pecahan = (mulai != mulai.round()) | (akhir.notna() & (akhir != akhir.round()))
+    # tahun_akhir tak hingga juga ditolak (dulu OverflowError saat jadi Int64).
+    pecahan = (mulai != mulai.round()) | (akhir.notna() & ((akhir != akhir.round()) | (akhir.abs() == math.inf)))
     if pecahan.any():
         raise ValueError("tahun harus bilangan bulat untuk id: " + ", ".join(df.loc[pecahan, "id"].astype(str)))
     df["tahun_mulai"] = mulai.astype(int)
