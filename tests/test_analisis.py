@@ -319,3 +319,9 @@ def test_saring_satu_tahun():
     df = contoh()
     assert analisis.saring(df, tahun=2017)["lembaga"].tolist() == ["Polisi Hessen"]
     assert len(analisis.saring(df, tahun=np.int64(2020))) == 1
+
+
+def test_cagr_tolak_tahun_kosong():
+    # NaN lolos dari "tahun <= 0" dan dulu diam-diam menghasilkan NaN.
+    with pytest.raises(ValueError, match="kosong"):
+        analisis.cagr(100, 200, float("nan"))
