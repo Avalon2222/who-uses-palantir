@@ -193,3 +193,10 @@ def test_validasi_nilai_negatif(pengguna, kontroversi):
     i = rusak.index[rusak["nilai_asli_juta"].notna()][0]
     rusak.loc[i, "nilai_asli_juta"] = -5.0
     assert f"{rusak.loc[i, 'id']}: nilai kontrak negatif" in muat_data.validasi(rusak, kontroversi)
+
+
+def test_validasi_nilai_tak_hingga(pengguna, kontroversi):
+    rusak = pengguna.copy()
+    i = rusak.index[rusak["nilai_asli_juta"].notna()][0]
+    rusak.loc[i, "nilai_asli_juta"] = float("inf")
+    assert f"{rusak.loc[i, 'id']}: nilai kontrak tak hingga" in muat_data.validasi(rusak, kontroversi)
