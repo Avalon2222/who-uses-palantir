@@ -200,3 +200,13 @@ def test_validasi_nilai_tak_hingga(pengguna, kontroversi):
     i = rusak.index[rusak["nilai_asli_juta"].notna()][0]
     rusak.loc[i, "nilai_asli_juta"] = float("inf")
     assert f"{rusak.loc[i, 'id']}: nilai kontrak tak hingga" in muat_data.validasi(rusak, kontroversi)
+
+
+def test_muat_pengguna_koordinat_teks_dilaporkan(tmp_path, kontroversi):
+    df = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    df["lat"] = df["lat"].astype(object)
+    df.loc[0, "lat"] = "51,5"
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    p = muat_data.muat_pengguna(csv)
+    assert f"{df.loc[0, 'id']}: koordinat kosong" in muat_data.validasi(p, kontroversi)
