@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 
@@ -124,6 +125,9 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
         # Nilai kontrak negatif hampir pasti salah ketik, dan diam-diam mengurangi total di kartu KPI.
         if pd.notna(r["nilai_asli_juta"]) and r["nilai_asli_juta"] < 0:
             masalah.append(f"{tag}: nilai kontrak negatif")
+        # "inf" dibaca to_numeric sebagai tak hingga dan membuat total di kartu KPI jadi inf.
+        elif pd.notna(r["nilai_asli_juta"]) and not math.isfinite(r["nilai_asli_juta"]):
+            masalah.append(f"{tag}: nilai kontrak tak hingga")
         if pd.notna(r["tahun_akhir"]) and r["tahun_akhir"] < r["tahun_mulai"]:
             masalah.append(f"{tag}: tahun_akhir sebelum tahun_mulai")
         for k in pecah_kontroversi(r["kontroversi"]):
