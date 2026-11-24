@@ -59,6 +59,10 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     df["tahun_mulai"] = mulai.astype(int)
     df["tahun_akhir"] = akhir.astype("Int64")
     df["nilai_asli_juta"] = pd.to_numeric(df["nilai_asli_juta"], errors="coerce")
+    # Koordinat salah ketik ("51,5" pakai koma) membuat kolomnya teks dan validasi gagal dengan
+    # TypeError saat membandingkan dengan -90. Jadikan NaN supaya dilaporkan "koordinat kosong".
+    for kol in ("lat", "lon"):
+        df[kol] = pd.to_numeric(df[kol], errors="coerce")
     for kol in ["mata_uang", "catatan_nilai", "kontroversi"]:
         df[kol] = df[kol].fillna("")
     return df
