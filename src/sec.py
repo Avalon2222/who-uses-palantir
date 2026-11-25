@@ -53,7 +53,8 @@ def ke_angka(teks: str) -> float | None:
     t = teks.replace(",", "").replace("\xa0", "").replace("\u2212", "-").replace("\u2013", "-")
     t = t.strip().lstrip("$").strip()
     negatif = t.startswith("(")
-    t = t.strip("()")
+    # Spasi di dalam kurung ("( 826,217 )") juga dibuang, kalau tidak fullmatch di bawah gagal.
+    t = t.strip("()").strip()
     if not re.fullmatch(r"-?\d+(\.\d+)?", t):
         return None
     nilai = float(t)
