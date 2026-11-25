@@ -233,3 +233,17 @@ def test_muat_pengguna_koordinat_teks_dilaporkan(tmp_path, kontroversi):
     df.to_csv(csv, index=False)
     p = muat_data.muat_pengguna(csv)
     assert f"{df.loc[0, 'id']}: koordinat kosong" in muat_data.validasi(p, kontroversi)
+
+
+def test_pendapatan_nilai_bukan_angka_jadi_nan(tmp_path):
+    f = tmp_path / "pendapatan.csv"
+    f.write_text(
+        "tahun,jenis,kategori,nilai_juta_usd,sumber_10k,sumber_url\n"
+        "2020,segmen,Komersial,100,x,u\n2020,segmen,Pemerintah,n.a.,x,u\n2021,segmen,Pemerintah,inf,x,u\n",
+        encoding="utf-8",
+    )
+    p = muat_data.muat_pendapatan(f)
+    assert pd.api.types.is_float_dtype(p["nilai_juta_usd"])
+    assert p["nilai_juta_usd"].isna().tolist() == [False, True, True]
+    tabel = analisis.pangsa_pendapatan(p, "segmen")
+    assert tabel.loc[tabel["tahun"] == 2020, "Komersial (%)"].iloc[0] == 100.0

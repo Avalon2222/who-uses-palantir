@@ -88,7 +88,12 @@ def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
 
 
 def muat_pendapatan(path: Path | None = None) -> pd.DataFrame:
-    return pd.read_csv(path or FOLDER_DATA / "pendapatan_palantir.csv")
+    df = pd.read_csv(path or FOLDER_DATA / "pendapatan_palantir.csv")
+    # Satu sel nilai bukan angka ("n.a.") membuat kolomnya teks, dan pivot pangsa pendapatan gagal
+    # membagi teks. Sel itu jadi NaN (kategori tanpa angka di tahun itu).
+    angka = pd.to_numeric(df["nilai_juta_usd"], errors="coerce")
+    df["nilai_juta_usd"] = angka.where(angka.abs() != math.inf)
+    return df
 
 
 def _id_dobel(ids: pd.Series) -> list[str]:
