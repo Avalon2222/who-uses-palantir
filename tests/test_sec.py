@@ -138,3 +138,9 @@ def test_ke_angka_dengan_simbol_dolar_di_sel_yang_sama():
 def test_ke_angka_minus_tipografi():
     assert sec.ke_angka("−826,217") == -826217.0
     assert sec.ke_angka("–1,000") == -1000.0
+
+
+def test_ke_angka_spasi_di_dalam_kurung():
+    assert sec.ke_angka("( 826,217 )") == -826217.0
+    assert sec.ke_angka("$ ( 1,234.5)") == -1234.5
+    assert sec.ke_angka("( )") is None
