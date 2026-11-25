@@ -93,7 +93,11 @@ def muat_pendapatan(path: Path | None = None) -> pd.DataFrame:
     # membagi teks. Sel itu jadi NaN (kategori tanpa angka di tahun itu).
     angka = pd.to_numeric(df["nilai_juta_usd"], errors="coerce")
     df["nilai_juta_usd"] = angka.where(angka.abs() != math.inf)
-    return df
+    # Tahun teks ("2024*") membuat sumbu tahun campur teks dan angka; tahun pecahan juga bukan tahun fiskal.
+    tahun = pd.to_numeric(df["tahun"], errors="coerce")
+    df = df[tahun.notna() & (tahun % 1 == 0)].copy()
+    df["tahun"] = tahun[df.index].astype(int)
+    return df.reset_index(drop=True)
 
 
 def _id_dobel(ids: pd.Series) -> list[str]:

@@ -247,3 +247,16 @@ def test_pendapatan_nilai_bukan_angka_jadi_nan(tmp_path):
     assert p["nilai_juta_usd"].isna().tolist() == [False, True, True]
     tabel = analisis.pangsa_pendapatan(p, "segmen")
     assert tabel.loc[tabel["tahun"] == 2020, "Komersial (%)"].iloc[0] == 100.0
+
+
+def test_pendapatan_tahun_rusak_dibuang(tmp_path):
+    f = tmp_path / "pendapatan.csv"
+    f.write_text(
+        "tahun,jenis,kategori,nilai_juta_usd,sumber_10k,sumber_url\n"
+        "2020,segmen,Komersial,100,x,u\n2024*,segmen,Komersial,50,x,u\n2021.5,segmen,Komersial,7,x,u\n"
+        "2021,segmen,Komersial,120,x,u\n",
+        encoding="utf-8",
+    )
+    p = muat_data.muat_pendapatan(f)
+    assert p["tahun"].tolist() == [2020, 2021]
+    assert p["tahun"].dtype.kind == "i"
