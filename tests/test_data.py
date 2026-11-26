@@ -260,3 +260,17 @@ def test_pendapatan_tahun_rusak_dibuang(tmp_path):
     p = muat_data.muat_pendapatan(f)
     assert p["tahun"].tolist() == [2020, 2021]
     assert p["tahun"].dtype.kind == "i"
+
+
+def test_id_berspasi_dirapikan(tmp_path, pengguna):
+    kon = pd.read_csv(muat_data.FOLDER_DATA / "kontroversi.csv")
+    kon["id"] = kon["id"] + " "
+    csv_kon = tmp_path / "kontroversi.csv"
+    kon.to_csv(csv_kon, index=False)
+    peng = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    peng.loc[1, "id"] = f" {peng.loc[0, 'id']} "
+    csv_peng = tmp_path / "pengguna.csv"
+    peng.to_csv(csv_peng, index=False)
+    masalah = muat_data.validasi(muat_data.muat_pengguna(csv_peng), muat_data.muat_kontroversi(csv_kon))
+    assert not any("tidak ada di kontroversi.csv" in m for m in masalah)
+    assert f"id pengguna duplikat: {peng.loc[0, 'id']}" in masalah

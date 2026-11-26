@@ -45,8 +45,18 @@ def pecah_kontroversi(teks) -> list[str]:
     return list(dict.fromkeys(k.strip() for k in re.split(r"[;,]", str(teks)) if k.strip()))
 
 
+def _rapikan_id(df: pd.DataFrame) -> pd.DataFrame:
+    """Spasi sisa suntingan di kolom id ("k1 ") dibuang.
+
+    Tag kontroversi di pengguna dibaca lewat pecah_kontroversi yang membuang spasi, jadi id "k1 " di
+    kontroversi.csv dulu dilaporkan "tidak ada", dan "p1" vs "p1 " lolos cek id duplikat.
+    """
+    df["id"] = df["id"].map(lambda v: v.strip() if isinstance(v, str) else v)
+    return df
+
+
 def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
-    df = pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str})
+    df = _rapikan_id(pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str}))
     mulai = pd.to_numeric(df["tahun_mulai"], errors="coerce")
     # "inf" terbaca to_numeric sebagai tak hingga, lalu astype(int) gagal tanpa menyebut id barisnya.
     mulai = mulai.where(mulai.abs() != math.inf)
@@ -72,7 +82,7 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
 
 
 def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
-    df = pd.read_csv(path or FOLDER_DATA / "kontroversi.csv")
+    df = _rapikan_id(pd.read_csv(path or FOLDER_DATA / "kontroversi.csv"))
     for kol in ("tahun", "dampak"):
         angka = pd.to_numeric(df[kol], errors="coerce")
         angka = angka.where(angka.abs() != math.inf)  # "inf" diperlakukan seperti bukan angka
