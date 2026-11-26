@@ -144,3 +144,12 @@ def test_ke_angka_spasi_di_dalam_kurung():
     assert sec.ke_angka("( 826,217 )") == -826217.0
     assert sec.ke_angka("$ ( 1,234.5)") == -1234.5
     assert sec.ke_angka("( )") is None
+
+
+def test_ke_angka_minus_sebelum_dolar():
+    assert sec.ke_angka("-$826") == -826.0
+    assert sec.ke_angka("- $ 1,234") == -1234.0
+    assert sec.ke_angka("−$1,234") == -1234.0
+    assert sec.ke_angka("($826,217)") == -826217.0
+    assert sec.ke_angka("$-826") == -826.0
+    assert sec.ke_angka("-") is None
