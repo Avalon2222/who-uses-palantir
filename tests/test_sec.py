@@ -153,3 +153,11 @@ def test_ke_angka_minus_sebelum_dolar():
     assert sec.ke_angka("($826,217)") == -826217.0
     assert sec.ke_angka("$-826") == -826.0
     assert sec.ke_angka("-") is None
+
+
+def test_tahun_header_menempel_di_teks_sel():
+    tabel = [["Year Ended", "December 31, 2025", "December 31, 2024"], ["Government", "1", "2"]]
+    assert sec._tahun_header(tabel) == [2025, 2024]
+    assert sec._tahun_header([["FY 2025", "FY 2024", "FY 2023"]]) == [2025, 2024, 2023]
+    # Angka ribuan seperti "120250" bukan tahun.
+    assert sec._tahun_header([["120250", "1202400"]]) == []
