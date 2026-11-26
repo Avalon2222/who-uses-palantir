@@ -51,14 +51,20 @@ def ke_angka(teks: str) -> float | None:
     # Sebagian 10-K menaruh simbol dolar di sel yang sama: "$1,569,605" atau "$ (826,217)".
     # Minus tipografi (U+2212) dan en dash juga dipakai sebagian dokumen sebagai tanda negatif.
     t = teks.replace(",", "").replace("\xa0", "").replace("\u2212", "-").replace("\u2013", "-")
+    t = t.strip()
+    # Tanda minus bisa ditulis sebelum simbol dolar ("-$826", "−$1,234"); dulu angka itu dianggap bukan angka.
+    minus = t.startswith("-") and t[1:].lstrip().startswith(("$", "("))
+    if minus:
+        t = t[1:]
     t = t.strip().lstrip("$").strip()
     negatif = t.startswith("(")
     # Spasi di dalam kurung ("( 826,217 )") juga dibuang, kalau tidak fullmatch di bawah gagal.
-    t = t.strip("()").strip()
+    # Dolar di dalam kurung ("($826)") ikut dibuang.
+    t = t.strip("()").strip().lstrip("$").strip()
     if not re.fullmatch(r"-?\d+(\.\d+)?", t):
         return None
     nilai = float(t)
-    return -nilai if negatif else nilai
+    return -nilai if negatif or minus else nilai
 
 
 def _label_bersih(teks: str) -> str:
