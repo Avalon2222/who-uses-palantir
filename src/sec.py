@@ -83,7 +83,8 @@ def baca_tabel(html: str) -> list[list[list[str]]]:
 
 def _tahun_header(baris_tabel: list[list[str]]) -> list[int]:
     for b in baris_tabel[:4]:
-        tahun = [int(x) for x in b if re.fullmatch(r"20\d\d", x)]
+        # Tahun bisa menempel di teks sel ("December 31, 2025" atau "FY 2024"), bukan hanya sel "2025".
+        tahun = [int(m) for x in b for m in re.findall(r"(?<!\d)(20\d\d)(?!\d)", x)]
         if len(tahun) >= 2:
             return tahun
     return []
