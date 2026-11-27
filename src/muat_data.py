@@ -114,6 +114,8 @@ def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
 
 def muat_pendapatan(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path or FOLDER_DATA / "pendapatan_palantir.csv")
+    # "wilayah " tidak cocok dengan jenis == "wilayah" di pangsa_pendapatan, sehingga barisnya hilang dari grafik.
+    df = _rapikan_teks(df, ["jenis", "kategori"])
     # Satu sel nilai bukan angka ("n.a.") membuat kolomnya teks, dan pivot pangsa pendapatan gagal
     # membagi teks. Sel itu jadi NaN (kategori tanpa angka di tahun itu).
     angka = pd.to_numeric(df["nilai_juta_usd"], errors="coerce")
