@@ -96,6 +96,8 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
 
 def muat_kontroversi(path: Path | None = None) -> pd.DataFrame:
     df = _rapikan_id(pd.read_csv(path or FOLDER_DATA / "kontroversi.csv"))
+    # Jenis/hasil berspasi dulu jadi kelompok terpisah di ringkasan kontroversi.
+    df = _rapikan_teks(df, ["negara", "jenis", "hasil"])
     for kol in ("tahun", "dampak"):
         angka = pd.to_numeric(df[kol], errors="coerce")
         angka = angka.where(angka.abs() != math.inf)  # "inf" diperlakukan seperti bukan angka

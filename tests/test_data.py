@@ -287,3 +287,18 @@ def test_muat_pengguna_kategori_berspasi_dirapikan(tmp_path):
     p = muat_data.muat_pengguna(csv)
     assert p.loc[0, ["sektor", "status", "kepastian", "iso3"]].tolist() == asli
     assert muat_data.validasi(p, muat_data.muat_kontroversi()) == []
+
+
+def test_muat_kontroversi_jenis_berspasi_satu_kelompok(tmp_path):
+    df = muat_data.muat_kontroversi()
+    jenis = df.loc[0, "jenis"]
+    df.loc[0, "jenis"] = f"{jenis}  "
+    df.loc[0, "hasil"] = f" {df.loc[0, 'hasil']}"
+    csv = tmp_path / "kontroversi.csv"
+    df.to_csv(csv, index=False)
+    kon = muat_data.muat_kontroversi(csv)
+    assert kon.loc[0, "jenis"] == jenis
+    ringkas = analisis.ringkas_kontroversi(kon, "jenis")
+    assert ringkas["jenis"].is_unique
+    assert ringkas["jumlah"].sum() == len(kon)
+    assert not kon["hasil"].str.startswith(" ").any()
