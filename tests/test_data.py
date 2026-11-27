@@ -274,3 +274,16 @@ def test_id_berspasi_dirapikan(tmp_path, pengguna):
     masalah = muat_data.validasi(muat_data.muat_pengguna(csv_peng), muat_data.muat_kontroversi(csv_kon))
     assert not any("tidak ada di kontroversi.csv" in m for m in masalah)
     assert f"id pengguna duplikat: {peng.loc[0, 'id']}" in masalah
+
+
+def test_muat_pengguna_kategori_berspasi_dirapikan(tmp_path):
+    df = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    asli = df.loc[0, ["sektor", "status", "kepastian", "iso3"]].tolist()
+    for kol in ("sektor", "status", "kepastian", "iso3"):
+        df[kol] = df[kol].astype(object)
+        df.loc[0, kol] = f" {df.loc[0, kol]} "
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    p = muat_data.muat_pengguna(csv)
+    assert p.loc[0, ["sektor", "status", "kepastian", "iso3"]].tolist() == asli
+    assert muat_data.validasi(p, muat_data.muat_kontroversi()) == []
