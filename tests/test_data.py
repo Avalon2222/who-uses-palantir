@@ -302,3 +302,15 @@ def test_muat_kontroversi_jenis_berspasi_satu_kelompok(tmp_path):
     assert ringkas["jenis"].is_unique
     assert ringkas["jumlah"].sum() == len(kon)
     assert not kon["hasil"].str.startswith(" ").any()
+
+
+def test_muat_pendapatan_jenis_dan_kategori_berspasi(tmp_path):
+    csv = tmp_path / "pendapatan.csv"
+    csv.write_text(
+        "tahun,jenis,kategori,nilai_juta_usd\n2024,segmen ,Komersial,100\n2024,segmen, Pemerintah ,300\n",
+        encoding="utf-8",
+    )
+    pend = muat_data.muat_pendapatan(csv)
+    p = analisis.pangsa_pendapatan(pend, "segmen")
+    assert p["Total"].tolist() == [400.0]
+    assert p["Pemerintah (%)"].tolist() == [75.0]
