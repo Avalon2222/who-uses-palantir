@@ -314,3 +314,15 @@ def test_muat_pendapatan_jenis_dan_kategori_berspasi(tmp_path):
     p = analisis.pangsa_pendapatan(pend, "segmen")
     assert p["Total"].tolist() == [400.0]
     assert p["Pemerintah (%)"].tolist() == [75.0]
+
+
+def test_muat_pengguna_iso3_huruf_kecil_disamakan(tmp_path):
+    df = pd.read_csv(muat_data.FOLDER_DATA / "pengguna_palantir.csv")
+    asli = df.loc[0, "iso3"]
+    df["iso3"] = df["iso3"].astype(object)
+    df.loc[0, "iso3"] = f" {asli.lower()} "
+    csv = tmp_path / "pengguna.csv"
+    df.to_csv(csv, index=False)
+    p = muat_data.muat_pengguna(csv)
+    assert p.loc[0, "iso3"] == asli
+    assert muat_data.validasi(p, muat_data.muat_kontroversi()) == []
