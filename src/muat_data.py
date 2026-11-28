@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 import re
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -32,6 +33,7 @@ SEKTOR = [
 STATUS = ["Aktif", "Rintisan", "Ditinjau ulang", "Ditolak/diblokir", "Berakhir", "Status tidak jelas"]
 KEPASTIAN = ["Resmi", "Laporan media"]
 MATA_UANG = ["USD", "GBP", "EUR", "AUD", "CAD"]
+TAHUN_MIN = 2003  # Palantir berdiri
 
 
 def pecah_kontroversi(teks) -> list[str]:
@@ -148,6 +150,7 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"id {nama} duplikat: " + ", ".join(dobel))
 
     id_kon = set(kontroversi["id"])
+    tahun_maks = date.today().year + 1  # rencana yang sudah diumumkan untuk tahun depan masih wajar
     for _, r in pengguna.iterrows():
         tag = r["id"]
         if r["sektor"] not in SEKTOR:
@@ -177,6 +180,10 @@ def validasi(pengguna: pd.DataFrame, kontroversi: pd.DataFrame) -> list[str]:
             masalah.append(f"{tag}: nilai kontrak tak hingga")
         if pd.notna(r["tahun_akhir"]) and r["tahun_akhir"] < r["tahun_mulai"]:
             masalah.append(f"{tag}: tahun_akhir sebelum tahun_mulai")
+        # Palantir berdiri 2003; tahun mulai 2109 (salah ketik 2019) dulu lolos dan membuat sumbu
+        # timeline melar seratus tahun.
+        if not TAHUN_MIN <= r["tahun_mulai"] <= tahun_maks:
+            masalah.append(f"{tag}: tahun_mulai di luar rentang {TAHUN_MIN}-{tahun_maks}")
         for k in pecah_kontroversi(r["kontroversi"]):
             if k not in id_kon:
                 masalah.append(f"{tag}: kontroversi '{k}' tidak ada di kontroversi.csv")
