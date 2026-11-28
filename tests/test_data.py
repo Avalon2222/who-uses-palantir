@@ -336,3 +336,18 @@ def test_validasi_tahun_mulai_di_luar_rentang(pengguna, kontroversi):
     assert any(m.startswith(f"{rusak.loc[0, 'id']}: tahun_mulai di luar rentang") for m in masalah)
     assert any(m.startswith(f"{rusak.loc[1, 'id']}: tahun_mulai di luar rentang") for m in masalah)
     assert len(masalah) == 2
+
+
+def test_muat_pendapatan_baris_dobel_pakai_terakhir(tmp_path):
+    csv = tmp_path / "pendapatan.csv"
+    csv.write_text(
+        "tahun,jenis,kategori,nilai_juta_usd,sumber_10k,sumber_url\n"
+        "2024,wilayah,Amerika Serikat,1800,10-K 2024,https://x\n"
+        "2024,wilayah,Negara lain,1000,10-K 2024,https://x\n"
+        "2024,wilayah,Amerika Serikat,1870,10-K 2024 (revisi),https://x\n"
+    )
+    pend = muat_data.muat_pendapatan(csv)
+    assert len(pend) == 2
+    pangsa = analisis.pangsa_pendapatan(pend, "wilayah")
+    assert pangsa.loc[0, "Amerika Serikat"] == 1870
+    assert pangsa.loc[0, "Total"] == 2870

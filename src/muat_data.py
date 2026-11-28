@@ -129,6 +129,9 @@ def muat_pendapatan(path: Path | None = None) -> pd.DataFrame:
     tahun = pd.to_numeric(df["tahun"], errors="coerce")
     df = df[tahun.notna() & (tahun % 1 == 0)].copy()
     df["tahun"] = tahun[df.index].astype(int)
+    # Baris yang tersalin dua kali (tahun, jenis, kategori sama) dulu dijumlahkan pivot sehingga
+    # pangsa kategori itu dua kali lipat; pakai baris terakhir (revisi 10-K terbaru).
+    df = df.drop_duplicates(["tahun", "jenis", "kategori"], keep="last")
     return df.reset_index(drop=True)
 
 
