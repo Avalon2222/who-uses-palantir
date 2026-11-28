@@ -70,6 +70,9 @@ def muat_pengguna(path: Path | None = None) -> pd.DataFrame:
     df = _rapikan_id(pd.read_csv(path or FOLDER_DATA / "pengguna_palantir.csv", dtype={"mata_uang": str}))
     # Sektor/status/kepastian berspasi dulu dilaporkan "tidak dikenal" dan hilang dari filter sektor.
     df = _rapikan_teks(df, ["negara", "iso3", "lembaga", "sektor", "status", "kepastian"])
+    # "gbr" dari suntingan manual dulu ditolak validasi dan tidak cocok dengan peta kawasan; kode ISO-3
+    # memang selalu huruf besar, jadi samakan saja.
+    df["iso3"] = df["iso3"].map(lambda v: v.upper() if isinstance(v, str) else v)
     mulai = pd.to_numeric(df["tahun_mulai"], errors="coerce")
     # "inf" terbaca to_numeric sebagai tak hingga, lalu astype(int) gagal tanpa menyebut id barisnya.
     mulai = mulai.where(mulai.abs() != math.inf)
