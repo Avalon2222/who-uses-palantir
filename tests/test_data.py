@@ -326,3 +326,13 @@ def test_muat_pengguna_iso3_huruf_kecil_disamakan(tmp_path):
     p = muat_data.muat_pengguna(csv)
     assert p.loc[0, "iso3"] == asli
     assert muat_data.validasi(p, muat_data.muat_kontroversi()) == []
+
+
+def test_validasi_tahun_mulai_di_luar_rentang(pengguna, kontroversi):
+    rusak = pengguna.copy()
+    rusak.loc[0, "tahun_mulai"] = 2109
+    rusak.loc[1, "tahun_mulai"] = 1999
+    masalah = muat_data.validasi(rusak, kontroversi)
+    assert any(m.startswith(f"{rusak.loc[0, 'id']}: tahun_mulai di luar rentang") for m in masalah)
+    assert any(m.startswith(f"{rusak.loc[1, 'id']}: tahun_mulai di luar rentang") for m in masalah)
+    assert len(masalah) == 2
